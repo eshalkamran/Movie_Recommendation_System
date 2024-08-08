@@ -1,0 +1,40 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - feature/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Build Docker image
+        run: docker-compose build
+
+      - name: Run Docker Compose
+        run: docker-compose up -d
+
+      - name: Wait for services to be ready
+        run: sleep 30
+
+      - name: Run Integration Tests
+        run: python3 test_user_service.py
+
+      - name: Shut down Docker Compose
+        run: docker-compose down
